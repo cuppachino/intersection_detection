@@ -1,3 +1,5 @@
+workspace = { members = ["lib/*"] }
+
 [package]
 name = "intersection_detection"
 version = "0.1.0"
@@ -8,7 +10,7 @@ edition = "2021"
 [dependencies]
 derive-new = "0.6.0"
 num = "0.4.1"
-point_like = { version = "0.1.0", path = "lib/point_like" }
+point_like = { version = "0.1.0", path = "./lib/point_like" }
 
 [dev-dependencies]
 rstest = "0.18.2"
