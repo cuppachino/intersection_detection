@@ -42,17 +42,14 @@ pub trait FromInto<T>: Sized {
     fn into_point_like(self) -> T;
 }
 
-impl<T> FromInto<T> for T
-where
-    Self: From<T> + Into<T>,
-{
+impl<F: Float> FromInto<[F; 2]> for [F; 2] {
     #[inline]
-    fn from_point_like(t: T) -> Self {
-        t.into()
+    fn from_point_like(t: [F; 2]) -> Self {
+        [t[0], t[1]]
     }
     #[inline]
-    fn into_point_like(self) -> T {
-        self.into()
+    fn into_point_like(self) -> [F; 2] {
+        [self[0], self[1]]
     }
 }
 

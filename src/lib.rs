@@ -1,11 +1,9 @@
-extern crate num;
-extern crate point_like;
-
 use derive_new::new;
 use num::Float;
 use std::marker::PhantomData;
 
 use point_like::*;
+pub use point_like::{self, FromInto as FromIntoPointLike, PointLike};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum IntersectionResult<F: Float, P: PointLike<F>> {
@@ -278,7 +276,19 @@ mod tests {
         #[case] expected: IntersectionResult<f32, [f32; 2]>,
     ) {
         // Round for use with assert_eq!.
-        let result = line1.intersection(&line2, 0.001).round(3);
-        assert_eq!(result, expected);
+        let computation = line1.intersection(&line2, 0.001).round(3);
+        assert_eq!(computation, expected);
+    }
+
+    #[test]
+    fn test() {
+        let line1 = Line::new([0.0, 0.0], [1.0, 1.0]);
+        let line2 = Line::new([0.0, 1.0], [1.0, 0.0]);
+        let computation = line1
+            .intersection(&line2, f32::EPSILON)
+            .try_into_intersection()
+            .ok();
+
+        assert_eq!(computation, Some(Intersection::Point([0.5, 0.5])));
     }
 }
