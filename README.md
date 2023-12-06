@@ -10,7 +10,7 @@ To use this crate, add it as a dependency to your `Cargo.toml` file:
 
 ```rust
 [dependencies]
-intersection_detection = "0.1"
+intersection_detection = "0.1.1"
 ```
 
 ## Example
