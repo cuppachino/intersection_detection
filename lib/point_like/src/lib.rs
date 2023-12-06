@@ -95,72 +95,28 @@ pub trait PointLike<N: Float>: Copy + PartialEq + FromInto<[N; 2]> {
     fn with_xy(x: N, y: N) -> Self;
 }
 
-impl<F: Float> PointLike<F> for [F; 2] {
-    #[inline]
-    fn x(&self) -> F {
-        self[0]
-    }
-    #[inline]
-    fn y(&self) -> F {
-        self[1]
-    }
-    #[inline]
+impl<T, F: Float> PointLike<F> for T
+where
+    T: Copy + PartialEq + FromInto<[F; 2]>,
+{
     fn with_x(&self, x: F) -> Self {
-        [x, self.y()]
+        Self::from_point_like([x, self.y()])
     }
-    #[inline]
-    fn with_y(&self, y: F) -> Self {
-        [self.x(), y]
-    }
-    #[inline]
-    fn with_xy(x: F, y: F) -> Self {
-        [x, y]
-    }
-}
 
-impl<F: Float> PointLike<F> for (F, F) {
-    #[inline]
-    fn x(&self) -> F {
-        self.0
-    }
-    #[inline]
-    fn y(&self) -> F {
-        self.1
-    }
-    #[inline]
-    fn with_x(&self, x: F) -> Self {
-        (x, self.y())
-    }
-    #[inline]
-    fn with_y(&self, y: F) -> Self {
-        (self.x(), y)
-    }
-    #[inline]
     fn with_xy(x: F, y: F) -> Self {
-        (x, y)
+        Self::from_point_like([x, y])
     }
-}
 
-impl<F: Float> PointLike<F> for (F, F, F) {
-    #[inline]
-    fn x(&self) -> F {
-        self.0
-    }
-    #[inline]
-    fn y(&self) -> F {
-        self.1
-    }
-    #[inline]
-    fn with_x(&self, x: F) -> Self {
-        (x, self.y(), self.2)
-    }
-    #[inline]
     fn with_y(&self, y: F) -> Self {
-        (self.x(), y, self.2)
+        Self::from_point_like([self.x(), y])
     }
-    #[inline]
-    fn with_xy(x: F, y: F) -> Self {
-        (x, y, F::zero())
+
+    fn x(&self) -> F {
+        self.into_point_like()[0]
+    }
+
+    fn y(&self) -> F {
+        self.into_point_like()[1]
     }
 }
 
