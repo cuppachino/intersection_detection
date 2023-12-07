@@ -10,7 +10,7 @@ To use this crate, add it as a dependency to your `Cargo.toml` file:
 
 ```rust
 [dependencies]
-intersection_detection = "0.1.2"
+intersection_detection = "0.1.3"
 ```
 
 ## Example
@@ -23,7 +23,7 @@ fn main() {
     let line2 = Line::new([0.0, 1.0], [1.0, 0.0]);
 
     let computation = line1
-            .intersection(&line2, f32::EPSILON)
+            .intersection(&line2)
             .try_into_intersection()
             .ok();
 
