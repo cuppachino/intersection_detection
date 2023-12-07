@@ -1,7 +1,7 @@
 # intersection_detection
 
 This crate provides functionality for computing intersections between line segments in 2D space.
-It defines types for representing intersections and includes methods for checking intersection results, 
+It defines types for representing intersections and includes methods for checking intersection results,
 converting between intersection types, and rounding intersection components to a specified precision.
 
 ## Usage
@@ -10,7 +10,7 @@ To use this crate, add it as a dependency to your `Cargo.toml` file:
 
 ```rust
 [dependencies]
-intersection_detection = "0.1.1"
+intersection_detection = "0.1.2"
 ```
 
 ## Example
@@ -33,10 +33,15 @@ fn main() {
 
 ## Points
 
-Implement `FromIntoPointLike` to use custom types as points. 
+Implement `FromIntoPointLike` to use custom types as points.
 
 Out-of-the-box implementations are provided for:
+
 - `[F; 2]`
 - `[F; 3]`
 - `(F, F)`
-- `(F, F, F)`.
+- `(F, F, F)`
+
+> **Note:** This crate re-exports the `point_like` crate, which is a trait for types that can be used as points.
+> The idea here was to let users determine float precision and avoid forcing usage of a specific algebra crate.
+> However, most of the methods in `PointLike` are "inspired" by the `glam` crate, so I would recommend using that if you're fine with `f32`.

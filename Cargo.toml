@@ -2,7 +2,7 @@ workspace = { members = ["lib/*"] }
 
 [package]
 name = "intersection_detection"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Jacob Bergholtz <cuppachino.dev@gmail.com>"]
 description = "Compute intersections between 2D lines"
@@ -13,7 +13,7 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 derive-new = "0.6.0"
 num = "0.4.1"
-point_like = { version = "0.1.1", path = "./lib/point_like" }
+point_like = { version = "0.1.2", path = "./lib/point_like" }
 
 [dev-dependencies]
 rstest = "0.18.2"

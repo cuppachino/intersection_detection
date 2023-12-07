@@ -3,7 +3,7 @@ use num::Float;
 use std::marker::PhantomData;
 
 use point_like::*;
-pub use point_like::{self, FromInto as FromIntoPointLike, PointLike};
+pub use point_like::{self, FromIntoPointLike, PointLike};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum IntersectionResult<F: Float, P: PointLike<F>> {
@@ -134,48 +134,68 @@ impl<F: Float, P: PointLike<F>> Line<F, P> {
     }
 
     /// Compute the intersection between two line segments, if any.
-    pub fn intersection(&self, other: &Self, epsilon: F) -> IntersectionResult<F, P> {
-        if self.approx_eq(&other, epsilon) {
-            return IntersectionResult::Intersection(Intersection::Coincident(*self));
-        }
+    pub fn intersection(&self, other: &Self) -> IntersectionResult<F, P> {
         let zero = F::zero();
         let one = F::one();
+        let epsilon = F::epsilon();
 
-        let p = self.start;
-        let r = self.direction();
-        let q = other.start;
-        let s = other.direction();
-        let rs = r.cross(s);
-        let qpr = q.sub(p).cross(r);
+        let a = self.direction();
+        let b = other.direction();
 
-        let rs_is_zero = rs.approx_eq(zero, epsilon);
-        let qpr_is_zero = qpr.approx_eq(zero, epsilon);
-        let r_len = r.length();
-        if rs_is_zero && qpr_is_zero && r_len.gt(&zero) {
-            let t1 = q.add(s.sub(p)).dot(r) / r.dot(r);
-            let t0 = t1.sub(s.dot(r) / r_len);
+        let r = other.start.sub(self.start);
+        let c = a.cross(b);
 
-            if t0.ge(&zero) && t0.le(&one) || t1.ge(&zero) && t1.le(&one) {
-                let first_point = self.start.max(other.start);
-                let second_point = self.end.min(other.end);
-                let line = Line::new(first_point, second_point);
-
-                return IntersectionResult::Intersection(Intersection::CollinearSegment(line));
+        // Non-parallel
+        if c.mul(c).gt(&zero) {
+            let s = r.cross(b) / c;
+            if s.is_not_between(zero, one) {
+                return IntersectionResult::None;
             }
+
+            let t = r.cross(a) / c;
+            if t.is_not_between(zero, one) {
+                return IntersectionResult::None;
+            }
+
+            if (s.approx_eq(zero, epsilon) || s.approx_eq(one, epsilon))
+                && (t.approx_eq(zero, epsilon) || t.approx_eq(one, epsilon))
+            {
+                return IntersectionResult::None;
+            }
+
+            return IntersectionResult::Intersection(Intersection::Point(
+                self.start.add(a.mul_f(s)),
+            ));
         }
 
-        if rs_is_zero && !qpr_is_zero {
+        // Parallel
+        let c = r.cross(a);
+        if c.abs().gt(&zero) {
             return IntersectionResult::Parallel;
         }
 
-        let t = q.sub(p).cross(s) / rs;
-        let u = qpr / rs;
-        if t >= zero && t <= one && u >= zero && u <= one {
-            let intersection = self.start.add(r.mul_f(t));
-            return IntersectionResult::Intersection(Intersection::Point(intersection));
+        let len = a.length_squared();
+        let sa = r.dot(a) / len;
+        let sb = sa.add(a.dot(b) / len);
+        let smin = sa.min(sb);
+        let smax = sa.max(sb);
+
+        if smax.le(&zero) || smin.ge(&one) {
+            return IntersectionResult::None;
         }
 
-        IntersectionResult::None
+        let intersection = Line::new(
+            P::splat(smin.max(zero)).mul_add(a, self.start),
+            P::splat(smax.min(one)).mul_add(a, self.start),
+        );
+
+        // Coincident
+        if intersection.approx_eq(self, epsilon) {
+            return IntersectionResult::Intersection(Intersection::Coincident(intersection));
+        }
+
+        // Collinear
+        IntersectionResult::Intersection(Intersection::CollinearSegment(intersection))
     }
 }
 
@@ -276,7 +296,7 @@ mod tests {
         #[case] expected: IntersectionResult<f32, [f32; 2]>,
     ) {
         // Round for use with assert_eq!.
-        let computation = line1.intersection(&line2, 0.001).round(3);
+        let computation = line1.intersection(&line2).round(3);
         assert_eq!(computation, expected);
     }
 
@@ -284,10 +304,7 @@ mod tests {
     fn test() {
         let line1 = Line::new([0.0, 0.0], [1.0, 1.0]);
         let line2 = Line::new([0.0, 1.0], [1.0, 0.0]);
-        let computation = line1
-            .intersection(&line2, f32::EPSILON)
-            .try_into_intersection()
-            .ok();
+        let computation = line1.intersection(&line2).try_into_intersection().ok();
 
         assert_eq!(computation, Some(Intersection::Point([0.5, 0.5])));
     }
